@@ -1,0 +1,39 @@
+clear 
+
+m_rec=5.75;
+w=50*pi;
+r=90*10^-3;
+Multi=m_rec*w*w*r;
+Crank_dia=0.112;
+Crank_length=0.056;
+Projected_area=Crank_dia*Crank_length;
+
+
+
+
+% Crank Angle
+Crank_angle_degree=[0;20;40;60;80;100;120;140;160;180;200;220;240;270;300;330;360;390;420;450;480;510;540;570;600;630;660;690;720];
+Crank_angle_radian=Crank_angle_degree*pi/180;
+
+%Foces
+F_cr=7.883*10^3;
+F_gas=[65;85;66;24;13;9;7.5;4.5;2.1;0.25;0.25;0.25;0.25;0.25;0.25;0.25;0.25;-0.1;-0.1;-0.1;-0.1;-0.1;-0.1;0.01;0.6;2;6;30;65]*10^3;
+
+for i=1:29
+phi(i)=asin(sin(Crank_angle_radian(i))/4);
+F_i(i)=(-1)*Multi*(cos(Crank_angle_radian(i))+(cos(2*Crank_angle_radian(i))/4));
+F_t(i)=(F_gas(i)+F_i(i))/cos(phi(i));
+
+%Resultant force
+f_resultant=(F_t(i)^2+(F_cr)^2-2*F_t(i)*F_cr*cos(Crank_angle_radian(i)+phi(i)))^0.5;
+f_resultant_plotted(i)=f_resultant
+end
+
+Average_f_resultant=mean(f_resultant,"all");
+
+disp(Average_f_resultant);
+
+pressure_average=Average_f_resultant/Projected_area;
+disp(pressure_average);
+
+%plot(Crank_angle_degree,f_resultant_plotted)
