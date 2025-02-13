@@ -1,0 +1,71 @@
+clear
+
+%oil properties
+rho_oil=860;
+p_av=3.2*10^6;
+Cp=1700;
+Diametre_of_crank_pin=0.112;
+Crank_pin_length=0.056;
+Lambda_indexed=[9.8;15;26];
+N_rps=25;
+Absolute_viscosity=[8.5*10^(-3);8.2*10^(-3);7.9*10^(-3);7.4*10^(-3);6.9*10^(-3);5.8*10^(-3)];
+Sommerfelds_number=[0.0314;0.0921;0.321];
+Temperature=[105;107;109;112;116;127];
+Tin=80;
+Delta_temperature=[25;27;29;32;36;47];
+Tb=(Tin+Temperature)/2;
+Delta_temperature_actual=0.8*Delta_temperature;
+T=(N_rps*Diametre_of_crank_pin^2)/p_av ;
+
+%Value calculation
+for i=1:6
+    Lambda_calculated(i)=(rho_oil*Cp*Delta_temperature_actual(i))/p_av;
+end
+   
+for i=1:6
+   Sommerfelds_calculated(i)= 0.0314 + 0.011673*(Lambda_calculated(i)-Lambda_indexed(1)) + 5.64197*10^-4*((Lambda_calculated(i)-Lambda_indexed(1))*(Lambda_calculated(i)-Lambda_indexed(2))) ...
+     - 0.09452*10^-4*((Lambda_calculated(i)-Lambda_indexed(1))*(Lambda_calculated(i)-Lambda_indexed(2))*(Lambda_calculated(i)-Lambda_indexed(3)));
+end
+
+%Diametral clearnce calculation
+for i=1:6
+Diametral_Clearance(i)= sqrt((Absolute_viscosity(i)*(T))/Sommerfelds_calculated(i));
+end
+
+%Diametral clerance in mm
+Diametral_Clearance_mm=10^3*Diametral_Clearance;
+
+for i=1:6
+    minimum_film_thickness(i)= 0.5*Diametral_Clearance(i)*(0.2+ 3.2949*(Sommerfelds_calculated(i)-Sommerfelds_number(1)) - 5.3432*(Sommerfelds_calculated(i)-Sommerfelds_number(1))*(Sommerfelds_calculated(i)-Sommerfelds_number(2)) ...
+    + 5.3218*(Sommerfelds_calculated(i)-Sommerfelds_number(1))*(Sommerfelds_calculated(i)-Sommerfelds_number(2))*(Sommerfelds_calculated(i)-Sommerfelds_number(3)));
+end
+
+%Actual film thickness in mm
+minimum_film_thickness_mm=10^3*minimum_film_thickness;
+
+%flow rate calculation
+for i=1:6
+Q(i)= (0.5*Crank_pin_length*Diametre_of_crank_pin*N_rps*Diametral_Clearance(i))*(3.17 + 6.42504*(Sommerfelds_calculated(i)-Sommerfelds_number(1)) - 16.6043*(Sommerfelds_calculated(i)-Sommerfelds_number(1))*(Sommerfelds_calculated(i)-Sommerfelds_number(2)) ...
++ 21.82871*(Sommerfelds_calculated(i)-Sommerfelds_number(1))*(Sommerfelds_calculated(i)-Sommerfelds_number(2))*(Sommerfelds_calculated(i)-Sommerfelds_number(3)));
+end
+%Flow rate Q in cc/hr
+Q_per_hr=3600*Q;
+
+%Value display and plot
+disp(Diametral_Clearance_mm);
+disp(minimum_film_thickness_mm);
+disp(Q_per_hr);
+
+%plot
+
+% plot(Diametral_Clearance_mm,Tb,'g');
+% xlabel('Diametral clearnce(mm)');
+% ylabel('Bearing Mean Temperature(C)');
+
+% plot(Diametral_Clearance_mm,minimum_film_thickness_mm);
+% xlabel('Diametral clearnce(mm)');
+% ylabel('Minimum film thickness(mm)');
+
+plot(Diametral_Clearance_mm,Q_per_hr,'b');
+xlabel('Diametral clearnce(mm)');
+ylabel('Flow rate in cc/hr')
